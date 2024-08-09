@@ -4,14 +4,38 @@ from kivymd.uix.screen import Screen
 from kivymd.uix.button import MDRoundFlatButton
 from kivy.lang import Builder
 from kivymd.uix.dialog import MDDialog
-from navigation import navigation_helper
+from test import navigation_helper
 from client import Client
 import json
 from kivymd.uix.navigationdrawer import MDNavigationDrawerItem
 import requests
 from requests import HTTPError
+from plyer import notification
+from kivy.clock import Clock
+from functools import partial
+from kivymd.utils import asynckivy
+from kivy.factory import Factory
 
 class WateringSystem(MDApp):
+    def refresh_callback(self):
+        def refresh_callback(interval):
+            self.screen.ids.info_box.clear_widgets()
+            try:
+                response = requests.get(f"http://{self.HOST}:{self.PORT}/")
+                response.raise_for_status()
+            except HTTPError as http_err:
+                self.screen.ids.info_box.add_widget(MDLabel(text=f"HTTP error occurred: {http_err}", halign="center",font_style= "H5"))
+            except Exception as err:
+                self.screen.ids.info_box.add_widget(MDLabel(text=f"Other error occurred: {err}", halign="center",font_style= "H5"))
+            else:           
+                sensor_data = response.json()
+
+                for prop in sensor_data:
+                    string = prop.capitalize().replace("_", " ") + " level: " + str(sensor_data[prop])
+                    self.screen.ids.info_box.add_widget(MDLabel(text=string, halign="center",font_style= "H5"))
+            self.screen.ids.refresh_layout.refresh_done()
+            self.tick = 0
+        Clock.schedule_once(refresh_callback, 1)
 
     def submit(self,sm,host,port):
         # close_button = MDRoundFlatButton(text="Close", pos_hint={"center_x":0.7, "center_y":0.5}, on_release=self.close)
@@ -19,6 +43,7 @@ class WateringSystem(MDApp):
         self.HOST = host.text
         self.PORT = port.text
         disconnect_button = MDRoundFlatButton(text="D", pos_hint={"center_x":0.7, "center_y":0.5}, on_release=self.close)
+        notification.notify(title="Hi", message="Bye")
         sm.current = "home"
         # self.dialog.open()
 
@@ -46,7 +71,7 @@ class WateringSystem(MDApp):
             sensor_data = response.json()
 
             for prop in sensor_data:
-                string = prop.capitalize() + " level: " + str(sensor_data[prop])
+                string = prop.capitalize().replace("_", " ") + " level: " + str(sensor_data[prop])
                 widget.add_widget(MDLabel(text=string, halign="center",font_style= "H5"))
 
         sm.current = "info"
@@ -64,15 +89,15 @@ class WateringSystem(MDApp):
         self.theme_cls.primary_palette = "Green"
         self.theme_cls.theme_style_switch_animation = True
 
-        self.screen = Screen()
-        nav = Builder.load_string(navigation_helper)
-        self.screen.add_widget(nav)
+        self.screen = Builder.load_string(navigation_helper)
+        # nav = Builder.load_string(navigation_helper)
+        # self.screen.add_widget(nav)
         
         return self.screen
     
     def on_start(self):
-        self.HOST = "empty"
-        self.PORT = 1
+        self.HOST = "192.168.2.236"
+        self.PORT = 9999
     
     def toggle_mode(self,icon):
         if self.theme_cls.theme_style == "Dark":
