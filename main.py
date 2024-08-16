@@ -4,7 +4,7 @@ from kivymd.uix.screen import Screen
 from kivymd.uix.button import MDRoundFlatButton
 from kivy.lang import Builder
 from kivymd.uix.dialog import MDDialog
-from test import navigation_helper
+from navigation import navigation_helper
 from client import Client
 import json
 from kivymd.uix.navigationdrawer import MDNavigationDrawerItem
@@ -15,6 +15,9 @@ from kivy.clock import Clock
 from functools import partial
 from kivymd.utils import asynckivy
 from kivy.factory import Factory
+from turn_on_values import turn_on_values_helper
+from kivymd.uix.list import TwoLineIconListItem, ImageLeftWidget, MDList
+
 
 class WateringSystem(MDApp):
     def refresh_callback(self):
@@ -29,10 +32,8 @@ class WateringSystem(MDApp):
                 self.screen.ids.info_box.add_widget(MDLabel(text=f"Other error occurred: {err}", halign="center",font_style= "H5"))
             else:           
                 sensor_data = response.json()
-
-                for prop in sensor_data:
-                    string = prop.capitalize().replace("_", " ") + " level: " + str(sensor_data[prop])
-                    self.screen.ids.info_box.add_widget(MDLabel(text=string, halign="center",font_style= "H5"))
+                list = self.generate_sensor_list(sensor_data)
+                self.screen.ids.info_box.add_widget(list)
             self.screen.ids.refresh_layout.refresh_done()
             self.tick = 0
         Clock.schedule_once(refresh_callback, 1)
@@ -49,14 +50,16 @@ class WateringSystem(MDApp):
 
     def sensor_submit(self,sm, moisture, temperature, humidity, air_quality, light):
         data = {
-            "moisture": int(moisture.text),
-            "temperature": int(temperature.text),
-            "humidity": int(humidity.text),
-            "air_quality": int(air_quality.text),
-            "light": int(light.text)
+            "moisture": int(moisture.text) if moisture.text != "" else 0,
+            "temperature": int(temperature.text) if temperature.text != "" else 0,
+            "humidity": int(humidity.text) if humidity.text != "" else 0,
+            "air_quality": float(air_quality.text) if air_quality.text != "" else 0,
+            "light": int(light.text) if light.text != "" else 0
         }
         requests.post(f"http://{self.HOST}:{self.PORT}/", json=data)
         sm.current = "home"
+
+    
 
     def sensor_data(self, sm, widget):
         widget.clear_widgets()
@@ -69,10 +72,8 @@ class WateringSystem(MDApp):
             widget.add_widget(MDLabel(text=f"Other error occurred: {err}", halign="center",font_style= "H5"))
         else:           
             sensor_data = response.json()
-
-            for prop in sensor_data:
-                string = prop.capitalize().replace("_", " ") + " level: " + str(sensor_data[prop])
-                widget.add_widget(MDLabel(text=string, halign="center",font_style= "H5"))
+            list = self.generate_sensor_list(sensor_data)
+            widget.add_widget(list)
 
         sm.current = "info"
 
@@ -113,6 +114,38 @@ class WateringSystem(MDApp):
     def show_login(self):
         self.screen.add_widget(self.button)
         self.screen.add_widget(self.username)
+
+    def get_turn_on_values(self, sm, moisture, temperature, humidity, air_quality, light):
+        try:
+            response = requests.get(f"http://{self.HOST}:{self.PORT}/turn-on-values")
+            response.raise_for_status()
+        except HTTPError:
+            notification.notify(title="HTTP Error", message=f"A HTTP error occurred when trying to get the sensor's turn on values")
+        except Exception:
+            notification.notify(title="Error", message=f"An error occurred when trying got get the sensor's turn on values")
+        else:           
+            turn_on_values = response.json()
+            moisture.text = str(turn_on_values["moisture"])
+            temperature.text = str(turn_on_values["temperature"])
+            humidity.text = str(turn_on_values["humidity"])
+            air_quality.text = str(turn_on_values["air_quality"])
+            light.text = str(turn_on_values["light"])
+
+        sm.current = "sensor"
+
+    def generate_sensor_list(self, data):
+        list = MDList()
+        for prop in data:
+            text = prop.capitalize().replace("_", " ")
+            list_item = TwoLineIconListItem(
+                ImageLeftWidget(source=f"{text}.png"),
+                text=text,
+                secondary_text= str(data[prop])
+                )
+            # list_item.add_widget(MDRoundFlatButton(text="Details"))
+            list.add_widget(list_item)
+        return list
+    
 
 
 WateringSystem().run()
