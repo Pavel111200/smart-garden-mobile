@@ -54,15 +54,22 @@ MDScreen:
                 MDScrollViewRefreshLayout:
                     id: refresh_layout
                     refresh_callback: app.refresh_callback
+                    size_hint: 1, .88
                     root_layout: root
                     spinner_color: "green"
-                    circle_color: "black"
-                    pos_hint: {"center_x": .5, "center_y": .5}
-                    MDBoxLayout:
+                    circle_color: "black"                   
+                    # pos_hint: {"center_x": .5, "center_y": .5}
+                    pos_hint_x : .5
+                    GridLayout:
                         id: info_box
-                        orientation: "vertical"
-                        size_hint: 1, .95
-                        pos_hint: {"center_x":0.5, "center_y":0.4}
+                        cols: 2  
+                        padding: [10,10,10,10]
+                        spacing: [20,10]
+                        row_default_height: 100
+                        # size_hint: 1, .94    
+                        size_hint_y: None
+                        pos_hint: {"center_x": .5, "center_y": .5}   
+                        height: self.minimum_height  
             MDScreen:
                 id: sensor
                 name: "sensor"

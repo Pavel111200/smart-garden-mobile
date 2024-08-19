@@ -1,7 +1,7 @@
 from kivymd.app import MDApp
 from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import Screen
-from kivymd.uix.button import MDRoundFlatButton
+from kivymd.uix.button import MDRoundFlatButton, MDRaisedButton
 from kivy.lang import Builder
 from kivymd.uix.dialog import MDDialog
 from navigation import navigation_helper
@@ -17,6 +17,9 @@ from kivymd.utils import asynckivy
 from kivy.factory import Factory
 from turn_on_values import turn_on_values_helper
 from kivymd.uix.list import TwoLineIconListItem, ImageLeftWidget, MDList
+from kivymd.uix.fitimage import FitImage
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image
 
 
 class WateringSystem(MDApp):
@@ -32,8 +35,7 @@ class WateringSystem(MDApp):
                 self.screen.ids.info_box.add_widget(MDLabel(text=f"Other error occurred: {err}", halign="center",font_style= "H5"))
             else:           
                 sensor_data = response.json()
-                list = self.generate_sensor_list(sensor_data)
-                self.screen.ids.info_box.add_widget(list)
+                self.generate_sensor_list(sensor_data)
             self.screen.ids.refresh_layout.refresh_done()
             self.tick = 0
         Clock.schedule_once(refresh_callback, 1)
@@ -72,8 +74,8 @@ class WateringSystem(MDApp):
             widget.add_widget(MDLabel(text=f"Other error occurred: {err}", halign="center",font_style= "H5"))
         else:           
             sensor_data = response.json()
-            list = self.generate_sensor_list(sensor_data)
-            widget.add_widget(list)
+            self.generate_sensor_list(sensor_data)
+            # widget.add_widget(list)
 
         sm.current = "info"
 
@@ -134,17 +136,29 @@ class WateringSystem(MDApp):
         sm.current = "sensor"
 
     def generate_sensor_list(self, data):
-        list = MDList()
+        # list = MDList()
+        # for prop in data:
+        #     text = prop.replace("_", " ").capitalize()
+        #     list_item = TwoLineIconListItem(
+        #         ImageLeftWidget(source=f"{text}.png"),
+        #         text=text,
+        #         secondary_text= str(data[prop])
+        #         )
+        #     # list_item.add_widget(MDRoundFlatButton(text="Details"))
+        #     list.add_widget(list_item)
+        # return list
         for prop in data:
-            text = prop.capitalize().replace("_", " ")
-            list_item = TwoLineIconListItem(
-                ImageLeftWidget(source=f"{text}.png"),
-                text=text,
-                secondary_text= str(data[prop])
-                )
-            # list_item.add_widget(MDRoundFlatButton(text="Details"))
-            list.add_widget(list_item)
-        return list
+            text = prop.replace("_", " ").capitalize()
+            image = Image(source=f"{text}.png")
+            self.screen.ids.info_box.add_widget(image)
+            info = BoxLayout(orientation="vertical")
+            info.add_widget(MDLabel(text=text, font_style="H6", halign="center"))
+            info.add_widget(MDLabel(text=data[prop], font_style="Subtitle1", halign="center"))
+            info.add_widget(MDRaisedButton(text="Details",
+                                            pos_hint={"center_x":0.5, "center_y":0.5},
+                                            text_color="white",
+                                            md_bg_color=(0.3, 0.69, 0.32, 1)))
+            self.screen.ids.info_box.add_widget(info)
     
 
 

@@ -3,7 +3,7 @@ MDScreen:
     BoxLayout:
         orientation: "vertical"
         MDTopAppBar:
-            title: "Navigation"
+            title: "Smart Garden"
             left_action_items: [["menu", lambda x: nav_drawer.set_state("toggle")]]
             specific_text_color: "#ffffff"
         Widget:
@@ -28,7 +28,7 @@ MDScreen:
                         halign: "center"
                         font_style: "H4"
             MDScreen:
-                name: "login"
+                name: "connect"
                 MDTextField:
                     id: host
                     hint_text: "Enter host"
@@ -36,7 +36,7 @@ MDScreen:
                     helper_text: "must be between 3 and 15 charecters"
                     size_hint_x: 0.7
                     helper_text_mode: "on_focus"
-                    icon_left: "account"
+                    icon_left: "server"
                 MDTextField:
                     id: port
                     hint_text: "Enter port number"
@@ -44,7 +44,7 @@ MDScreen:
                     helper_text: "must be between 3 and 5 charecters"
                     size_hint_x: 0.7
                     helper_text_mode: "on_focus"
-                    icon_left: "account"
+                    icon_left: "server"
                 MDRoundFlatButton:
                     text: "Submit"
                     pos_hint: {"center_x":0.5, "center_y":0.3}
@@ -54,21 +54,71 @@ MDScreen:
                 MDScrollViewRefreshLayout:
                     id: refresh_layout
                     refresh_callback: app.refresh_callback
+                    size_hint: 1, .88
                     root_layout: root
                     spinner_color: "green"
-                    circle_color: "black"
-                    pos_hint: {"center_x": .5, "center_y": .4}
-                    MDBoxLayout:
+                    circle_color: "black"                   
+                    # pos_hint: {"center_x": .5, "center_y": .5}
+                    pos_hint_x : .5
+                    GridLayout:
                         id: info_box
-                        orientation: "vertical"
-                        size_hint: 1, .95
-                        pos_hint: {"center_x":0.5, "center_y":0.4}
+                        cols: 2  
+                        padding: [10,10,10,10]
+                        spacing: [20,10]
+                        row_default_height: 100
+                        # size_hint: 1, .94    
+                        size_hint_y: None
+                        pos_hint: {"center_x": .5, "center_y": .5}   
+                        height: self.minimum_height  
+            MDScreen:
+                id: sensor
+                name: "sensor"
+                MDBoxLayout:
+                    orientation: "vertical"
+                    size_hint: 0.7, 0.9
+                    pos_hint: {"center_x":0.5, "center_y":0.55}
+                    spacing: 20
+                    MDTextField:
+                        id: moisture
+                        hint_text: "Enter soil moisture in %"
+                        helper_text: "must be between 0 and 100"
+                        icon_right: "percent"
+                        helper_text_mode: "on_focus"
+                    MDTextField:
+                        id: temperature
+                        hint_text: "Enter temperature in Celsius"
+                        helper_text: "must be between -40 and 85"
+                        icon_right: "temperature-celsius"
+                        helper_text_mode: "on_focus"
+                    MDTextField:
+                        id: humidity
+                        hint_text: "Enter humidity in %"
+                        helper_text: "must be between 0 and 100"
+                        icon_right: "percent"
+                        helper_text_mode: "on_focus"
+                    MDTextField:
+                        id: air_quality
+                        hint_text: "Enter air quality"
+                        helper_text: "must be between 0 and 1"
+                        icon_right: "air-filter"
+                        helper_text_mode: "on_focus"
+                    MDTextField:
+                        id: light
+                        hint_text: "Enter light level"
+                        helper_text: "must be between 0 and 65535"
+                        icon_right: "lightbulb-on-90"
+                        helper_text_mode: "on_focus"
+                    MDRectangleFlatButton:
+                        text: "Submit"
+                        pos_hint: {"center_x":0.5, "center_y":0.1}
+                        on_release: app.sensor_submit(screen_manager, moisture, temperature, humidity, air_quality, light)
         MDNavigationDrawer:
             id: nav_drawer
             radius: 0, dp(16), dp(16), 0
             MDNavigationDrawerMenu:
-                MDNavigationDrawerLabel:
-                    text: "Menu"
+                MDNavigationDrawerHeader:
+                    title: "Menu"
+                    source: "plant_icon.png"
                 MDNavigationDrawerDivider:
                 MDNavigationDrawerItem:
                     text: "Home"
@@ -78,9 +128,9 @@ MDScreen:
                     text_color: "#ffffff"
                     selected_color: "#ffffff"
                 MDNavigationDrawerItem:
-                    icon: "account"
-                    text: "Login"
-                    on_release: screen_manager.current = "login"
+                    icon: "connection"
+                    text: "Connect"
+                    on_release: screen_manager.current = "connect"
                     icon_color: "#4caf50"
                     text_color: "#ffffff"
                     selected_color: "#ffffff" 
@@ -95,7 +145,7 @@ MDScreen:
                 MDNavigationDrawerItem:
                     icon: "motion-sensor"
                     text: "Adjust sensors"
-                    on_release: app.get_turn_on_values(screen_manager)
+                    on_release: app.get_turn_on_values(screen_manager, moisture, temperature, humidity, air_quality, light)
                     icon_color: "#4caf50"
                     text_color: "#ffffff"
                     selected_color: "#ffffff"                
