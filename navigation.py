@@ -112,6 +112,62 @@ MDScreen:
                         text: "Submit"
                         pos_hint: {"center_x":0.5, "center_y":0.1}
                         on_release: app.sensor_submit(screen_manager, moisture, temperature, humidity, air_quality, light)
+            MDScreen:
+                name: "manual"
+                GridLayout:
+                    size_hint: 1, .88
+                    cols: 2
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        Image:
+                            source: "Electric-Fan.png"
+                        MDBoxLayout:
+                            MDRaisedButton:
+                                text: "ON"
+                                text_color: "white"
+                                md_bg_color: (0.3, 0.69, 0.32, 1)
+                                pos_hint: {"center_x":0.5, "center_y":0.2}
+                                on_release: app.manual_control("fan", "on")
+                            MDRaisedButton:
+                                text: "OFF"
+                                text_color: "white"
+                                md_bg_color: "red"
+                                pos_hint: {"center_x":0.6, "center_y":0.2}
+                                on_release: app.manual_control("fan", "off")
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        Image:
+                            source: "Watering-can.png"
+                        MDBoxLayout:
+                            MDRaisedButton:
+                                text: "ON"
+                                text_color: "white"
+                                md_bg_color: (0.3, 0.69, 0.32, 1)
+                                pos_hint: {"center_x":0.4, "center_y":0.2}
+                                on_release: app.manual_control("pump", "on")
+                            MDRaisedButton:
+                                text: "OFF"
+                                text_color: "white"
+                                md_bg_color: "red"
+                                pos_hint: {"center_x":0.6, "center_y":0.2}
+                                on_release: app.manual_control("pump", "off")
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        Image:
+                            source: "Light.png"
+                        MDBoxLayout:
+                            MDRaisedButton:
+                                text: "ON"
+                                text_color: "white"
+                                md_bg_color: (0.3, 0.69, 0.32, 1)
+                                pos_hint: {"center_x":0.4, "center_y":0.2}
+                                on_release: app.manual_control("light", "on")
+                            MDRaisedButton:
+                                text: "OFF"
+                                text_color: "white"
+                                md_bg_color: "red"
+                                pos_hint: {"center_x":0.6, "center_y":0.2}
+                                on_release: app.manual_control("light", "off")
         MDNavigationDrawer:
             id: nav_drawer
             radius: 0, dp(16), dp(16), 0
@@ -148,5 +204,12 @@ MDScreen:
                     on_release: app.get_turn_on_values(screen_manager, moisture, temperature, humidity, air_quality, light)
                     icon_color: "#4caf50"
                     text_color: "#ffffff"
-                    selected_color: "#ffffff"                
+                    selected_color: "#ffffff"
+                MDNavigationDrawerItem:
+                    icon: "motion-sensor"
+                    text: "Manual control"
+                    on_release: screen_manager.current = "manual"
+                    icon_color: "#4caf50"
+                    text_color: "#ffffff"
+                    selected_color: "#ffffff"                     
 """

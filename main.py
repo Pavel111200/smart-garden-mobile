@@ -41,14 +41,11 @@ class WateringSystem(MDApp):
         Clock.schedule_once(refresh_callback, 1)
 
     def submit(self,sm,host,port):
-        # close_button = MDRoundFlatButton(text="Close", pos_hint={"center_x":0.7, "center_y":0.5}, on_release=self.close)
-        # self.dialog = MDDialog(title="Entered information", text=text_field.text, size_hint=(0.7,1), buttons=[close_button])
         self.HOST = host.text
         self.PORT = port.text
         disconnect_button = MDRoundFlatButton(text="D", pos_hint={"center_x":0.7, "center_y":0.5}, on_release=self.close)
         notification.notify(title="Hi", message="Bye")
         sm.current = "home"
-        # self.dialog.open()
 
     def sensor_submit(self,sm, moisture, temperature, humidity, air_quality, light):
         data = {
@@ -75,17 +72,8 @@ class WateringSystem(MDApp):
         else:           
             sensor_data = response.json()
             self.generate_sensor_list(sensor_data)
-            # widget.add_widget(list)
 
-        sm.current = "info"
-
-        # self.client.send("Get data")
-        # while True:
-        #     message = self.client.receive()
-        #     data = json.loads(message)
-        #     for prop in data:
-        #         string = prop.capitalize() + " level " + str(data[prop])
-        #         self.root.ids.info_box.add_widget(MDLabel(text=string, halign="center",font_style= "H5"))            
+        sm.current = "info"         
 
     def build(self):
         self.theme_cls.theme_style = "Dark"
@@ -93,13 +81,11 @@ class WateringSystem(MDApp):
         self.theme_cls.theme_style_switch_animation = True
 
         self.screen = Builder.load_string(navigation_helper)
-        # nav = Builder.load_string(navigation_helper)
-        # self.screen.add_widget(nav)
         
         return self.screen
     
     def on_start(self):
-        self.HOST = "192.168.2.236"
+        self.HOST = "192.168.112.15"
         self.PORT = 9999
     
     def toggle_mode(self,icon):
@@ -136,17 +122,6 @@ class WateringSystem(MDApp):
         sm.current = "sensor"
 
     def generate_sensor_list(self, data):
-        # list = MDList()
-        # for prop in data:
-        #     text = prop.replace("_", " ").capitalize()
-        #     list_item = TwoLineIconListItem(
-        #         ImageLeftWidget(source=f"{text}.png"),
-        #         text=text,
-        #         secondary_text= str(data[prop])
-        #         )
-        #     # list_item.add_widget(MDRoundFlatButton(text="Details"))
-        #     list.add_widget(list_item)
-        # return list
         for prop in data:
             text = prop.replace("_", " ").capitalize()
             image = Image(source=f"{text}.png")
@@ -154,12 +129,21 @@ class WateringSystem(MDApp):
             info = BoxLayout(orientation="vertical")
             info.add_widget(MDLabel(text=text, font_style="H6", halign="center"))
             info.add_widget(MDLabel(text=data[prop], font_style="Subtitle1", halign="center"))
-            info.add_widget(MDRaisedButton(text="Details",
-                                            pos_hint={"center_x":0.5, "center_y":0.5},
-                                            text_color="white",
-                                            md_bg_color=(0.3, 0.69, 0.32, 1)))
             self.screen.ids.info_box.add_widget(info)
-    
+
+    def manual_control(self, acctuator, state):
+        if(acctuator == "fan" and state == "on"):
+            requests.post(f"http://{self.HOST}:{self.PORT}/fan/on")
+        elif(acctuator == "fan" and state == "off"):
+            requests.post(f"http://{self.HOST}:{self.PORT}/fan/off")
+        elif(acctuator == "pump" and state == "on"):
+            requests.post(f"http://{self.HOST}:{self.PORT}/pump/on")
+        elif(acctuator == "pump" and state == "off"):
+            requests.post(f"http://{self.HOST}:{self.PORT}/pump/off")
+        elif(acctuator == "light" and state == "on"):
+            requests.post(f"http://{self.HOST}:{self.PORT}/light/on")
+        elif(acctuator == "light" and state == "off"):
+            requests.post(f"http://{self.HOST}:{self.PORT}/light/off")
 
 
 WateringSystem().run()
