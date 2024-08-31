@@ -1,23 +1,11 @@
 from kivymd.app import MDApp
 from kivymd.uix.label import MDLabel
-from kivymd.uix.screen import Screen
-from kivymd.uix.button import MDRoundFlatButton, MDRaisedButton
 from kivy.lang import Builder
-from kivymd.uix.dialog import MDDialog
 from navigation import navigation_helper
-from client import Client
-import json
-from kivymd.uix.navigationdrawer import MDNavigationDrawerItem
 import requests
 from requests import HTTPError
 from plyer import notification
 from kivy.clock import Clock
-from functools import partial
-from kivymd.utils import asynckivy
-from kivy.factory import Factory
-from turn_on_values import turn_on_values_helper
-from kivymd.uix.list import TwoLineIconListItem, ImageLeftWidget, MDList
-from kivymd.uix.fitimage import FitImage
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 
@@ -43,22 +31,18 @@ class WateringSystem(MDApp):
     def submit(self,sm,host,port):
         self.HOST = host.text
         self.PORT = port.text
-        disconnect_button = MDRoundFlatButton(text="D", pos_hint={"center_x":0.7, "center_y":0.5}, on_release=self.close)
-        notification.notify(title="Hi", message="Bye")
         sm.current = "home"
 
     def sensor_submit(self,sm, moisture, temperature, humidity, air_quality, light):
         data = {
-            "moisture": int(moisture.text) if moisture.text != "" else 0,
+            "moisture": float(moisture.text) if moisture.text != "" else 0,
             "temperature": int(temperature.text) if temperature.text != "" else 0,
             "humidity": int(humidity.text) if humidity.text != "" else 0,
             "air_quality": float(air_quality.text) if air_quality.text != "" else 0,
             "light": int(light.text) if light.text != "" else 0
         }
         requests.post(f"http://{self.HOST}:{self.PORT}/", json=data)
-        sm.current = "home"
-
-    
+        sm.current = "home" 
 
     def sensor_data(self, sm, widget):
         widget.clear_widgets()
@@ -95,9 +79,6 @@ class WateringSystem(MDApp):
         else:
             icon.icon = "white-balance-sunny"
             self.theme_cls.theme_style = "Dark"
-    
-    def close(self,obj):
-        self.dialog.dismiss()
 
     def show_login(self):
         self.screen.add_widget(self.button)
@@ -128,7 +109,7 @@ class WateringSystem(MDApp):
             self.screen.ids.info_box.add_widget(image)
             info = BoxLayout(orientation="vertical")
             info.add_widget(MDLabel(text=text, font_style="H6", halign="center"))
-            info.add_widget(MDLabel(text=data[prop], font_style="Subtitle1", halign="center"))
+            info.add_widget(MDLabel(text=format(data[prop], ".2f"), font_style="Subtitle1", halign="center"))
             self.screen.ids.info_box.add_widget(info)
 
     def manual_control(self, acctuator, state):

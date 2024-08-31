@@ -206,7 +206,7 @@ MDScreen:
                     text_color: "#ffffff"
                     selected_color: "#ffffff"
                 MDNavigationDrawerItem:
-                    icon: "motion-sensor"
+                    icon: "hand-back-left"
                     text: "Manual control"
                     on_release: screen_manager.current = "manual"
                     icon_color: "#4caf50"
